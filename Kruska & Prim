@@ -1,0 +1,186 @@
+package sortingtest;
+
+import java.util.Random;
+import java.util.Scanner;
+
+public class SortingTest {
+
+    public static int[] parent = new int[1001];
+
+    public static void main(String[] args) {
+
+        Scanner num = new Scanner(System.in);
+        int n = num.nextInt();
+        // num.close();
+
+        int graph[][] = new int[1001][1001];
+
+//        graf rar
+//        for (int i = 0; i < n; i++) {
+//            for (int j = 0; j < n; j++) {
+//                graph[i][j] = 0;
+//            }
+//        }
+//
+//        for (int i = 0; i < n - 1; i++) {
+//
+//            Random rand = new Random();
+//            int upperbound = 50;
+//
+//            graph[i][i + 1] = graph[i + 1][i] = rand.nextInt(upperbound) + 1;
+//        }
+//
+//
+//
+//
+        // graf dens
+        for (int i = 0; i < n; i++) {//crearea matricei
+            for (int j = 0; j < n; j++) {
+                graph[i][j] = 0;
+            }
+        }
+
+        for (int i = 0; i < n; i++) {   // umplerea matricei cu numere random de la 1 pana la 51
+            for (int j = 0; j < n; j++) {
+                if (i != j) {           // lasa diagonala 0
+                    Random rand = new Random();
+                    int upperbound = 50;
+                    graph[i][j] = graph[j][i] = rand.nextInt(upperbound) + 1;
+                }
+            }
+        }
+//Printare matrice
+        if (n <= 10) {
+            for (int i = 0; i < n; i++) {
+                for (int j = 0; j < n; j++) {
+
+                    System.out.print(graph[i][j] + " | ");
+
+                }
+                System.out.println();
+            }
+        }
+// restabilirea matricei pentru ca functia sa poata rezolva
+//unde e 0, devine MAX
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                if (graph[i][j] == 0) {
+                    graph[i][j] = Integer.MAX_VALUE;
+                }
+            }
+        }
+        long startTime = System.nanoTime();
+        kruskalMST(graph, n);
+        long endTime = System.nanoTime();
+
+        long timeElapsed = endTime - startTime;
+        System.out.println("Timpul de executie Kruskal in microsecunde: " + timeElapsed / 1000 + "\n");
+///////////////////////////////////////////////////////////////////
+        int visited[] = new int[n];
+        int min = 999;
+        int u = 0;//sursa
+        int v = 0;//destinatia
+        int total = 0;
+
+        for (int i = 0; i < n; i++) {
+
+            visited[i] = 0; //varful vizitat trece in 0
+
+            for (int j = 0; j < n; j++) {
+                if (graph[i][j] == 0) {
+                    graph[i][j] = 999;    // daca valorile grafului sunt egale cu 0 inseamna ca nu elemente in acest graf
+                }
+            }
+        }
+
+        visited[0] = 1;    //
+
+        long startTimeP = System.nanoTime();
+
+        for (int counter = 0; counter < n - 1; counter++) {   // 
+
+            min = 999;
+            for (int i = 0; i < n; i++) {
+
+                if (visited[i] == 1) { // varful sursă este egal cu 1
+                    for (int j = 0; j < n; j++) { //
+
+                        if (visited[j] == 0) {// setam destinatia in 0
+
+                            if (min > graph[i][j]) {
+
+                                min = graph[i][j];
+
+                                u = i;   //atribuim sursa
+                                v = j;  //atribui destinatia
+                            }
+                        }
+                    }
+                }
+            }
+
+            visited[v] = 1;  // toate sunt conectate
+            total = total + min;
+            if (n <= 10) {
+                System.out.println("Sursa" + u + "--->" + v + ": " + min);
+            }
+        }
+        long endTimeP = System.nanoTime();
+
+        long timeElapsedP = endTimeP - startTimeP;
+
+        System.out.println("Costul minim alg. Prim = " + total);
+        System.out.println("Timp in microsecunde:" + timeElapsedP / 1000);
+    }
+
+    public static int find(int i) {
+        while (parent[i] != i) {
+            i = parent[i];
+        }
+        return i;
+    }
+
+    public static void union(int i, int j) {//face unirea la i si j
+        int a = find(i);
+        int b = find(j);
+        parent[a] = b;
+    }
+
+    public static void kruskalMST(int graph[][], int n) {
+        int mincost = 0;
+        parent = new int[n];
+
+        for (int i = 0; i < n; i++) {
+            parent[i] = i;
+        }
+
+        int edge_count = 0;
+        while (edge_count < n - 1) {
+            int min = Integer.MAX_VALUE;
+            int a = -1;
+            int b = -1;
+            for (int i = 0; i < n; i++) {
+                for (int j = 0; j < n; j++) {
+                    if (find(i) != find(j)) {
+                        if (graph[i][j] < min) {
+                            if (min != 0) {
+                                min = graph[i][j];
+                                a = i;
+                                b = j;
+                            }
+                        }
+                    }
+                }
+            }
+
+            union(a, b);
+            edge_count++;
+            if (n <= 10) {
+                System.out.println("Sursa" + a + "->>" + b + " Min=" + min);
+            }
+            mincost += min;
+
+        }
+        System.out.println("Costul minim alg. Kruskal: " + mincost);
+    }
+}
