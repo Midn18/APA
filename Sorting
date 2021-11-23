@@ -1,0 +1,258 @@
+package sorting;
+
+import java.util.Random;
+import java.util.Scanner;
+
+public class Sorting {
+
+    public static void main(String[] args) {
+
+        System.out.println("Insert array length:");
+        Scanner num = new Scanner(System.in);
+        int n = num.nextInt();
+        num.close();
+
+        int arr[] = new int[n];
+        n = arr.length;
+
+        int[] mergeArr = new int[n];
+        int[] quickArr = new int[n];
+        int[] gnomeArr = new int[n];
+
+        Random rd = new Random();
+        for (int i = 0; i < arr.length; i++) {
+            arr[i] = rd.nextInt();
+        }
+
+//      tablou deja sortat
+//        for (int i = 0; i < n; i++) {
+//            mergeArr[i] = quickArr[i] = gnomeArr[i] = i;
+//        }
+//
+//
+//      tablou sortat descrescator
+//        for (int i = 0; i < n; i++) {
+//            mergeArr[i] = quickArr[i] = gnomeArr[i] = n - i;
+//        }
+//
+//
+//       tablou random sortat
+//        for (int i = 0; i < n; i++) {
+//            mergeArr[i] = quickArr[i] = gnomeArr[i] = arr[i];
+//        }
+//
+//        tablou fara ultim element sortat
+//        for (int i = 0; i < n; i++) {
+//            mergeArr[i] = quickArr[i] = gnomeArr[i] = i + 1;
+//        }
+//        mergeArr[n - 1] = quickArr[n - 1] = gnomeArr[n - 1] = 0;
+
+//
+//
+        //tablou cu un element din mijloc nesortat
+        for (int i = 0; i < n / 2; i++) {
+            mergeArr[i] = quickArr[i] = gnomeArr[i] = i + 1;
+        }
+        mergeArr[n / 2] = quickArr[n / 2] = 0;
+
+        for (int i = n / 2 + 1; i < n; i++) {
+            mergeArr[i] = quickArr[i] = gnomeArr[i] = i;
+        }
+        
+        //
+        //
+        System.out.println("Quick Sort");
+
+        if (n <= 50) {
+            printArray(quickArr);
+        }
+
+        long startTimeQ = System.nanoTime();
+
+        sortQ(quickArr, 0, n - 1);
+
+        long endTimeQ = System.nanoTime();
+
+        long timeElapsedQ = endTimeQ - startTimeQ;
+
+        System.out.println("Execution time of Quick in nanoseconds:" + timeElapsedQ);
+        if (n >= 10000) {
+            System.out.println("Execution time of Quick in miliseconds:" + timeElapsedQ / 1000000);
+            System.out.println("Execution time of Quick in seconds:" + timeElapsedQ / 1000000000);
+        }
+
+        if (n <= 50) {
+            printArray(quickArr);
+        }
+////////////////////////////////////////////////////////////////////////////////
+        System.out.println("Merge Sort");
+        if (n <= 50) {
+            printArray(mergeArr);
+        }
+        long startTimeM = System.nanoTime();
+
+        sortM(mergeArr, 0, n - 1);
+
+        long endTimeM = System.nanoTime();
+
+        long timeElapsedM = endTimeM - startTimeM;
+
+        System.out.println("Execution time of Merge in nanoseconds:" + timeElapsedM);
+        if (n >= 10000) {
+            System.out.println("Execution time of Merge in miliseconds:" + timeElapsedM / 1000000);
+            System.out.println("Execution time of Merge in seconds:" + timeElapsedM / 1000000000);
+        }
+
+        if (n <= 50) {
+            printArray(quickArr);
+        }
+////////////////////////////////////////////////////////////////////////////////
+        System.out.println("Gnome Sort");
+        if (n <= 50) {
+            printArray(gnomeArr);
+        }
+        long startTimeG = System.nanoTime();
+
+        gnomeSort(gnomeArr, n);
+
+        long endTimeG = System.nanoTime();
+
+        long timeElapsedG = endTimeG - startTimeG;
+
+        System.out.println("Execution time of Gnome in nanoseconds:" + timeElapsedG);
+        if (n > 100) {
+            System.out.println("Execution time of Gnome in miliseconds:" + timeElapsedG / 1000000);
+            System.out.println("Execution time of Gnome in seconds:" + timeElapsedG / 1000000000);
+        }
+//
+        if (n <= 50) {
+            printArray(gnomeArr);
+        }
+    }
+////////////////////////////////////////////////////////
+    static void randomPivot(int arr[], int beg, int end) {
+
+        Random rand = new Random();
+        int pivot = rand.nextInt(end - beg) + beg;
+
+        int temp1 = arr[pivot];
+        arr[pivot] = arr[end];
+        arr[end] = temp1;
+    }
+
+    static int partition(int arr[], int beg, int end) {
+
+        randomPivot(arr, beg, end);
+        int pivot = arr[end];
+
+        int i = (beg - 1);
+        for (int j = beg; j < end; j++) {
+            if (arr[j] < pivot) {
+                i++;
+
+                int temp = arr[i];
+                arr[i] = arr[j];
+                arr[j] = temp;
+            }
+        }
+
+        int temp = arr[i + 1];
+        arr[i + 1] = arr[end];
+        arr[end] = temp;
+
+        return i + 1;
+    }
+
+    static void sortQ(int arr[], int beg, int end) {
+        if (beg < end) {
+
+            int pi = partition(arr, beg, end);
+
+            sortQ(arr, beg, pi - 1);
+            sortQ(arr, pi + 1, end);
+        }
+    }
+/////////////////////////////////////////////////////////
+    static void merge(int arr[], int l, int m, int r) {
+
+        int n1 = m - l + 1;
+        int n2 = r - m;
+
+        int L[] = new int[n1];
+        int R[] = new int[n2];
+
+        for (int i = 0; i < n1; ++i) {
+            L[i] = arr[l + i];
+        }
+        for (int j = 0; j < n2; ++j) {
+            R[j] = arr[m + 1 + j];
+        }
+
+        int i = 0, j = 0;
+
+        int k = l;
+        while (i < n1 && j < n2) {
+            if (L[i] <= R[j]) {
+                arr[k] = L[i];
+                i++;
+            } else {
+                arr[k] = R[j];
+                j++;
+            }
+            k++;
+        }
+
+        while (i < n1) {
+            arr[k] = L[i];
+            i++;
+            k++;
+        }
+
+        while (j < n2) {
+            arr[k] = R[j];
+            j++;
+            k++;
+        }
+    }
+
+    static void sortM(int arr[], int l, int r) {
+        if (l < r) {
+
+            int m = l + (r - l) / 2;
+
+            sortM(arr, l, m);
+            sortM(arr, m + 1, r);
+
+            merge(arr, l, m, r);
+        }
+    }
+
+    //////////////////////////////////////////
+    static void gnomeSort(int arr[], int n) {
+        int index = 0;
+
+        while (index < n) {
+            if (index == 0) {
+                index++;
+            }
+            if (arr[index] >= arr[index - 1]) {
+                index++;
+            } else {
+                int temp = 0;
+                temp = arr[index];
+                arr[index] = arr[index - 1];
+                arr[index - 1] = temp;
+                index--;
+            }
+        }
+//        return;
+    }
+
+    static void printArray(int arr[]) {
+        int n = arr.length;
+        for (int i = 0; i < n; ++i) {
+            System.out.print(arr[i] + " ");
+        }
+        System.out.println();
+    }
+}
