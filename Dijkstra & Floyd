@@ -1,0 +1,181 @@
+package shortestpathalg;
+
+import java.util.Random;
+import java.util.Scanner;
+
+public class ShortestPathAlg {
+
+    public static int minDistance(int dist[], Boolean sptSet[], int n) {
+
+        int min = Integer.MAX_VALUE, min_index = -1;
+
+        for (int v = 0; v < n; v++) {
+            if (sptSet[v] == false && dist[v] <= min) {
+                min = dist[v];
+                min_index = v;
+            }
+        }
+
+        return min_index;
+    }
+
+    public static void printSolution(int dist[], int n) {
+        System.out.println("Varful \t\t Distanta de la sursa");
+        for (int i = 0; i < n; i++) {
+            System.out.println(i + " \t\t " + dist[i]);
+        }
+    }
+
+
+    public static void dijkstra(int graph[][], int src, int n) {
+        int dist[] = new int[n]; // aici se tine distanta minima de la sursa la i
+        Boolean sptSet[] = new Boolean[n];
+
+        for (int i = 0; i < n; i++) {   // are loc initializarea tuturor distantelor ca INFINIT
+            dist[i] = Integer.MAX_VALUE;
+            sptSet[i] = false;
+        }
+
+        dist[src] = 0; //distanta de la sursa la sursa mereu 0
+
+        for (int count = 0; count < n - 1; count++) {   // cauta cel mai scurt drum pentru toate varfurile
+
+            int u = minDistance(dist, sptSet, n);   //se ia distanta minima din varfurile neprocesate
+            sptSet[u] = true;  // se marcheaza varful ales ca accesat
+
+            for (int v = 0; v < n; v++)
+            {   // se actualizeaza dist daca nu se gaseste in sptSet,si ponderea de la sursa la destinatie este mai mica ca valoarea curenta dist[n]
+                if (!sptSet[v] && graph[u][v] != 0 &&
+                    dist[u] != Integer.MAX_VALUE &&
+                    dist[u] + graph[u][v] < dist[v]) {
+                    dist[v] = dist[u] + graph[u][v];
+                }
+            }
+        }
+
+        if (n <= 10) {
+            printSolution(dist, n);
+        }
+    }
+
+    static void floydWarshall(int[][] graph, int n) {
+        int INF = 9999;
+
+        int[][] dist = new int[n][n];
+        for (int i = 0; i < n; ++i) {
+            dist[i] = new int[n];
+        }
+
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                dist[i][j] = graph[i][j];
+            }
+        }
+
+        for (int k = 0; k < n; k++) //se incearca toate nodurile intermediare
+        {
+            for (int i = 0; i < n; i++) //se incearca pozitiile de start
+            {
+                for (int j = 0; j < n; j++) //se incearca toate pozitiile de la sfarsit
+                {
+                    if (dist[i][j] > (dist[i][k] + dist[k][j])
+                        && //verificam daca distanta e mai surta ca varful k
+                        (dist[k][j] != INF  // evitam daca k nu poate fi accesat de la i sau daca j inaccesibil de la 1
+                            && dist[i][k] != INF)) //facem skip daca k nu poate fi reached de la i sau daca j unreach de la l
+                    {
+                        dist[i][j] = dist[i][k] + dist[k][j];
+                    }
+                }
+            }
+        }
+
+        if (n <= 10) {// drumurile
+            for (int i = 0; i < n; ++i) {
+                for (int j = 0; j < n; ++j) {
+                    System.out.println(i + " -> " + j + " dist " + dist[i][j]);
+                }
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        Scanner num = new Scanner(System.in);
+        int n = num.nextInt();
+
+        int graph[][] = new int[1001][1001];
+
+        // graf rar
+//        for (int i = 0; i < n; i++) {
+//            for (int j = 0; j < n; j++) {
+//                graph[i][j] = 0;
+//            }
+//        }
+//
+//        for (int i = 0; i < n - 1; i++) {
+//
+//            Random rand = new Random();
+//            int upperbound = 50;
+//
+//            graph[i][i + 1] = graph[i + 1][i] = rand.nextInt(upperbound) + 1;
+//        }
+//
+//
+//      graf dens
+        for (int i = 0; i < n; i++) {//crearea matricei
+            for (int j = 0; j < n; j++) {
+                graph[i][j] = 0;
+            }
+        }
+
+        for (int i = 0; i < n; i++) {   // umplerea matricei cu numere random de la 1 pana la 51
+            for (int j = 0; j < n; j++) {
+                if (i != j) {           // lasa diagonala 0
+                    Random rand = new Random();
+                    int upperbound = 50;
+                    graph[i][j] = graph[j][i] = rand.nextInt(upperbound) + 1;
+                }
+            }
+        }
+
+        if (n <= 10) {
+            for (int i = 0; i < n; i++) {
+                for (int j = 0; j < n; j++) {
+                    System.out.print(graph[i][j] + " | ");
+                }
+                System.out.println();
+            }
+        }
+
+        long startTimeD = System.nanoTime();
+        dijkstra(graph, 0, n);
+        long endTimeD = System.nanoTime();
+        long timeElapsedD = endTimeD - startTimeD;
+        System.out.println("Timp de execuție Dijkstra in microsecunde:" + timeElapsedD / 1000);
+        ///////////////////////////////////////////////////////////////////////////////////////////////
+        long startTimeDt = System.nanoTime();
+        for (int i = 0; i < n; i++) {  // aici se creaza posibilitatea pentru Dijkstra de a merge din toate nodurile in toate nodurile
+            dijkstra(graph, i, n);
+        }
+        long endTimeDt = System.nanoTime();
+        long timeElapsedDt = endTimeDt - startTimeDt;
+        System.out.println("Timp de execuție Dijkstra pentru toate nodurile in microsecunde:" + timeElapsedDt / 1000);
+
+
+        /////////////////////////////////////////////////////////////////////////////////////////////
+        for (int i = 0; i < n; i++) {// forul care ne permite sa lucreze algoritmul lui floyd
+            for (int j = 0; j < n; j++) {
+                int INF = 9999;
+                if (graph[i][j] == 0) {
+                    graph[i][j] = INF;
+                }
+            }
+        }
+
+        long startTimeF = System.nanoTime();
+        floydWarshall(graph, n);
+        long endTimeF = System.nanoTime();
+        long timeElapsedF = endTimeF - startTimeF;
+        System.out.println("Timp de execuție Floyd in microsecunde:" + timeElapsedF / 1000);
+
+    }
+}
